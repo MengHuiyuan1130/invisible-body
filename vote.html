@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Invisible Body – Audience Voting</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: #000;
+      color: #f5f5f5;
+    }
+
+    .page {
+      min-height: 100vh;
+      padding: 16px;
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    header {
+      padding-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      margin: 0 0 4px 0;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #bdbdbd;
+    }
+
+    .card {
+      background: #111;
+      border-radius: 16px;
+      border: 1px solid #333;
+      padding: 14px 16px;
+    }
+
+    .status-line {
+      font-size: 0.85rem;
+      color: #bdbdbd;
+      margin-bottom: 6px;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #555;
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+    }
+
+    .pill-label {
+      color: #e0e0e0;
+    }
+
+    .pill-value {
+      margin-left: 6px;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .pill.phase-training {
+      border-color: #4caf50;
+      color: #c8ffca;
+    }
+
+    .pill.phase-inference {
+      border-color: #ff9800;
+      color: #ffe0b2;
+    }
+
+    .pill.phase-waiting {
+      border-color: #757575;
+      color: #e0e0e0;
+    }
+
+    .pill.phase-done {
+      border-color: #9e9e9e;
+      color: #eeeeee;
+    }
+
+    .info-text {
+      font-size: 0.8rem;
+      color: #aaaaaa;
+      line-height: 1.4;
+      margin-top: 6px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      padding: 10px;
+      font-size: 0.9rem;
+      resize: vertical;
+      background: #000;
+      color: #f5f5f5;
+    }
+
+    textarea::placeholder,
+    input::placeholder {
+      color: #757575;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #444;
+      padding: 10px;
+      font-size: 0.9rem;
+      background: #000;
+      color: #f5f5f5;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #9e9e9e;
+      margin-top: -4px;
+    }
+
+    button {
+      margin-top: 6px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      background: #4caf50;
+      color: #000;
+      letter-spacing: 0.03em;
+    }
+
+    button:disabled {
+      background: #333;
+      color: #888;
+    }
+
+    .message {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      min-height: 1.2em;
+    }
+
+    .message.ok {
+      color: #a5d6a7;
+    }
+
+    .message.error {
+      color: #ef9a9a;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 4px 2px 0 2px;
+      font-size: 0.7rem;
+      color: #757575;
+      text-align: center;
+    }
+
+    @media (min-width: 768px) {
+      .page {
+        padding-top: 24px;
+        padding-bottom: 24px;
+      }
+      h1 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Invisible Body · Audience Voting</h1>
+      <div class="subtitle">
+        Live annotation of movement semantics.
+      </div>
+    </header>
+
+    <section class="card">
+      <div id="connectionStatus" class="status-line">
+        Connecting to live session…
+      </div>
+
+      <div class="pill-row">
+        <div id="phaseTag" class="pill phase-waiting">
+          <span class="pill-label">phase</span>
+          <span class="pill-value">waiting</span>
+        </div>
+        <div id="actionTag" class="pill">
+          <span class="pill-label">action</span>
+          <span class="pill-value">0</span>
+        </div>
+      </div>
+
+      <div class="info-text">
+        During the <strong>training</strong> phase, you are invited to describe what
+        you think the performer is doing and how confident you are in your
+        interpretation. Your inputs will shape how the system names this movement.
+      </div>
+    </section>
+
+    <section class="card">
+      <form id="voteForm">
+        <label for="labelInput">What do you think this action is?</label>
+        <textarea
+          id="labelInput"
+          placeholder="For example: searching for something, shielding, praying, collapsing…"
+          required
+        ></textarea>
+
+        <label for="confidenceInput">How confident are you? (0–100)</label>
+        <input
+          id="confidenceInput"
+          type="number"
+          min="0"
+          max="100"
+          inputmode="numeric"
+          placeholder="For example: 75"
+          required
+        />
+        <div class="hint">
+          0 = just a guess · 100 = completely certain.
+        </div>
+
+        <button type="submit" id="submitButton">Submit your annotation</button>
+        <div id="formMessage" class="message"></div>
+      </form>
+    </section>
+
+    <footer>
+      Your responses are anonymous. They will be aggregated and reflected back
+      to the performer in the second loop.
+    </footer>
+  </div>
+
+  <!-- Firebase compat (same as index.html) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Your Firebase config (defines firebase, db, window.SESSION_ID) -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Voting logic -->
+  <script src="vote.js"></script>
+</body>
+</html>
